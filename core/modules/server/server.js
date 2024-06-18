@@ -389,6 +389,28 @@ Server.prototype.listen = function(port,host,prefix) {
 		$tw.utils.log("Serving on " + url,"brown/orange");
 		$tw.utils.log("(press ctrl-C to exit)","red");
 	});
+
+	this.connections = 0;
+	this.autoExitHandle = null;
+	server.on("request", function(req) {
+		if (self.autoExitHandle !== null) {
+			$tw.utils.log("Resetting auto exit on idle", "white");
+			clearTimeout(self.autoExitHandle);
+			self.autoExitHandle = null;
+		}
+		self.connections += 1;
+		req.on("end", function() {
+			self.connections -= 1;
+			if (self.connections === 0) {
+				self.autoExitHandle = setTimeout(function() {
+					$tw.utils.log("Cleaning up", "white");
+					self.autoExitHandle = null;
+					server.unref();
+				}, 60*1000);
+			}
+		});
+	});
+
 	// Listen
 	let listenFd = this.systemdActivationSocketFd();
 	if (listenFd) {
