@@ -327,6 +327,26 @@ Server.prototype.requestHandler = function(request,response,options) {
 	}
 };
 
+Server.prototype.systemdActivationSocketFd = function() {
+  if (!process.env["LISTEN_PID"]) {
+    // We were not started by Systemd using socket activation.
+    return null;
+  } else {
+    const listen_pid = parseInt(process.env["LISTEN_PID"], 10);
+    if (listen_pid !== process.pid) {
+      // We were not _directly_ started by Systemd (Systemd started some
+      // other process via using socket activation, which then started us).
+      $tw.utils.log("Found LISTEN_PID environment variable, but it does not point at our process. Ignoring.");
+      return null;
+    }
+  }
+  // Systemd passes the FDS immediatly after stdin/stdout/stderr.
+  const SD_LISTEN_FDS_START = 3;
+  // TODO: look at the LISTEN_FDS environment variable to ensure that there
+  // is at least 1 FD listening for us.
+  return SD_LISTEN_FDS_START;
+};
+
 /*
 Listen for requests
 port: optional port number (falls back to value of "port" variable)
@@ -370,7 +390,12 @@ Server.prototype.listen = function(port,host,prefix) {
 		$tw.utils.log("(press ctrl-C to exit)","red");
 	});
 	// Listen
-	return server.listen(port,host);
+	let listenFd = this.systemdActivationSocketFd();
+	if (listenFd) {
+		return server.listen({fd: listenFd});
+	} else {
+		return server.listen(port,host);
+	}
 };
 
 exports.Server = Server;
