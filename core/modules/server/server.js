@@ -384,8 +384,13 @@ Server.prototype.listen = function(port,host,prefix) {
 	}
 	// Display the port number after we've started listening (the port number might have been specified as zero, in which case we will get an assigned port)
 	server.on("listening",function() {
-		var address = server.address(),
-			url = self.protocol + "://" + (address.family === "IPv6" ? "[" + address.address + "]" : address.address) + ":" + address.port + prefix;
+		var address = server.address();
+		if (address === null) {
+			// This can happen if we were passed a unix domain socket (possibly via FD) to listen on.
+			$tw.utils.log("Serving on unknown socket (unable to determine address)","brown/orange");
+			return;
+		}
+		var url = self.protocol + "://" + (address.family === "IPv6" ? "[" + address.address + "]" : address.address) + ":" + address.port + prefix;
 		$tw.utils.log("Serving on " + url,"brown/orange");
 		$tw.utils.log("(press ctrl-C to exit)","red");
 	});
