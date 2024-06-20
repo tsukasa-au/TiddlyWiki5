@@ -44,6 +44,7 @@ title: $:/core/templates/tiddlywiki5-external-js.html
 <!--~~ Raw markup for the bottom of the body section ~~-->
 `{{{ [enlist<saveTiddlerAndShadowsFilter>tag[$:/tags/RawMarkupWikified/BottomBody]] ||$:/core/templates/raw-static-tiddler}}}`
 <!--~~ Load external JavaScripts ~~-->
+<script src="`{{{ [<pluginURL>] }}}`" onerror="alert('Error: Cannot load `{{{ [<pluginURL>] }}}`');"></script>
 <script src="`{{{ [<coreURL>] }}}`" onerror="alert('Error: Cannot load `{{{ [<coreURL>] }}}`');"></script>
 </body>
 </html>`

@@ -1,0 +1,14 @@
+
+title: $:/core/templates/tiddlywiki5-plugins.js
+
+
+`/* ~~ Plugin modules ~~ */
+window.$tw = (function ($tw) {
+    "use strict";
+    $tw = $tw || Object.create(null);
+    $tw.preloadTiddlers = $tw.preloadTiddlers || [];
+    $tw.preloadTiddlers = $tw.preloadTiddlers.concat(`
+<$text text=<<jsontiddlers "[plugin-type[plugin]] [plugin-type[theme]] -[[$:/core]]" "2">>/>`);
+    return $tw;
+})(window.$tw);
+`
